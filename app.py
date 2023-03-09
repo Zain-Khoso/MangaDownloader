@@ -6,6 +6,7 @@ import os, sys
 from pathlib import Path
 from time import time
 from Scrapers.OnePiece import download_OnePiece_Manga
+from Scrapers.AceNovel import download_AceNovel_Manga
 
 
 # This is the main function of the program that manages all that is going in the program.
@@ -15,7 +16,7 @@ def main():
     mangaName = sys.argv[1]
 
     # Setting up the downloaders that are available.
-    downloaders = ["OnePiece"]
+    downloaders = ["OnePiece", "AceNovel"]
 
     # Checking if the program can or connot download the specified manga.
     if mangaName not in downloaders:
@@ -32,6 +33,11 @@ def main():
         # Call to download_OnePiece_Manga funtion inside Scraper.OnePiece module.
         # Which downloads the appropriate manga.
         download_OnePiece_Manga()
+    
+    elif mangaName == "AceNovel":
+        # Call to download_AceNovel_Manga funtion inside Scraper.AceNovel module.
+        # Which downloads the appropriate manga.
+        download_AceNovel_Manga()
 
 
 if __name__ == "__main__":
@@ -40,10 +46,10 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         endTime = time()
-        print('Stopped.')
+        print("Stopped.")
     else:
         endTime = time()
-        print('Done.')
+        print("Done.")
     finally:
         timeTaken = endTime - startTime
         print(f"Took {round(timeTaken, 2)}s")
