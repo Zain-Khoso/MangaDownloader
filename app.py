@@ -2,9 +2,10 @@
 # app.py - Kickstarts the program by getting the manga name in the commandline-arguments
 # and downloading the approprient manga.
 
-from pathlib import Path
-from OnePiece.main import download_OnePiece_Manga
 import os, sys
+from pathlib import Path
+from time import time
+from Scrapers.OnePiece import download_OnePiece_Manga
 
 
 # This is the main function of the program that manages all that is going in the program.
@@ -16,34 +17,34 @@ def main():
     # Setting up the downloaders that are available.
     downloaders = ["OnePiece"]
 
-    # Checking if the program con or connot download the specified manga.
-    if mangaName in downloaders:
-        # Changing the Current-Working-Directory to the Newly-Created /
-        # An-Existing downloads directory.
-        os.makedirs(f"{mangaName}-Downloads", exist_ok=True)
-        os.chdir(rootDir / f"{mangaName}-Downloads")
-
-        # Checks the manga name once again and determinds which module to call.
-        if mangaName == "OnePiece":
-            # Downloads all the imgs one-by-one each with a new thread and
-            # returns all the threads.
-            threads = download_OnePiece_Manga()
-
-            # Appending all the threads to the main thread
-            for thread in threads:
-                thread.join()
-            return
-        else:
-            return
-
-    else:
+    # Checking if the program can or connot download the specified manga.
+    if mangaName not in downloaders:
         print(f"Sorry, We don't currently have a downloader for {mangaName}.")
         return
 
+    # Changing the Current-Working-Directory to the Newly-Created /
+    # An-Existing downloads directory.
+    os.makedirs(f"{mangaName}-Manga", exist_ok=True)
+    os.chdir(rootDir / f"{mangaName}-Manga")
+
+    # Checks the manga name once again and determinds which module to call.
+    if mangaName == "OnePiece":
+        # Call to download_OnePiece_Manga funtion inside Scraper.OnePiece module.
+        # Which downloads the appropriate manga.
+        download_OnePiece_Manga()
+
 
 if __name__ == "__main__":
-    main()
-
-    print("Done. ")
-
-    sys.exit()
+    try:
+        startTime = time()
+        main()
+    except KeyboardInterrupt:
+        endTime = time()
+        print('Stopped.')
+    else:
+        endTime = time()
+        print('Done.')
+    finally:
+        timeTaken = endTime - startTime
+        print(f"Took {round(timeTaken, 2)}s")
+        sys.exit()
