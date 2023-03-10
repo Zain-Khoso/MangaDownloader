@@ -7,6 +7,7 @@ from pathlib import Path
 from time import time
 from Scrapers.OnePiece import download_OnePiece_Manga
 from Scrapers.AceNovel import download_AceNovel_Manga
+from Scrapers.AOT import download_AOT_Manga
 
 
 # This is the main function of the program that manages all that is going in the program.
@@ -16,7 +17,7 @@ def main():
     mangaName = sys.argv[1]
 
     # Setting up the downloaders that are available.
-    downloaders = ["OnePiece", "AceNovel"]
+    downloaders = ["OnePiece", "AceNovel", "AOT"]
 
     # Checking if the program can or connot download the specified manga.
     if mangaName not in downloaders:
@@ -30,14 +31,19 @@ def main():
 
     # Checks the manga name once again and determinds which module to call.
     if mangaName == "OnePiece":
-        # Call to download_OnePiece_Manga funtion inside Scraper.OnePiece module.
+        # Call to download_OnePiece_Manga funtion inside Scrapers.OnePiece module.
         # Which downloads the appropriate manga.
         download_OnePiece_Manga()
     
     elif mangaName == "AceNovel":
-        # Call to download_AceNovel_Manga funtion inside Scraper.AceNovel module.
+        # Call to download_AceNovel_Manga funtion inside Scrapers.AceNovel module.
         # Which downloads the appropriate manga.
         download_AceNovel_Manga()
+    
+    elif mangaName == "AOT":
+        # Call to download_AOT_Manga funtion inside Scrapers.AOT module.
+        # Which downloads the appropriate manga.
+        download_AOT_Manga()
 
 
 if __name__ == "__main__":
