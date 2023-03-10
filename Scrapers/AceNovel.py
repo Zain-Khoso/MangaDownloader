@@ -25,7 +25,7 @@ def download_AceNovel_Manga():
         try:
             res = requests.get(cwURL)
             res.raise_for_status()
-        except ConnectionError:
+        except ConnectionError or HTTPError:
             print("Unable to download Chapter_%s at %s" % (chNum, cwURL))
         else:
             # Creating a DOM Object for the downloaded document.
@@ -110,13 +110,14 @@ def downloadPage(chNum, pages, sIndex, eIndex):
             img = requests.get(imgURL)
             img.raise_for_status()
         except ConnectionError or HTTPError as err:
-            print(f"Was not able to download Page_{imgURL}")
+            print(f"Was not able to download Page_{os.path.basename(imgURL)[-6:]}")
 
             # Creates a new txt file for the error that occured when downloading the
             # current page. And Opens it.
             file = open(
-                Path.cwd() / f"Chapter_{chNum}" / os.path.basename(imgURL)[-6:]
-                + ".txt",
+                Path.cwd()
+                / f"Chapter_{chNum}"
+                / f"{os.path.basename(imgURL)[-6:]}.txt",
                 "w",
             )
             # Writes the newly created file.

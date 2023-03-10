@@ -15,7 +15,7 @@ def download_AOT_Manga():
     # Loops until there are no chapters to be downloaded.
     while cwURL != None:
         # Determinds which chapter is being downloaded and creates a folder for that chapter.
-        chNumSearch = re.compile(r"chapter-(\d+)").search(cwURL)
+        chNumSearch = re.compile(r"chapter-((\d|\.)+)").search(cwURL)
         chNum = chNumSearch.group(1)
         os.makedirs(f"Chapter_{chNum}", exist_ok=True)
 
@@ -23,7 +23,7 @@ def download_AOT_Manga():
         try:
             res = requests.get(cwURL)
             res.raise_for_status()
-        except ConnectionError:
+        except ConnectionError or HTTPError:
             print("Unable to download Chapter_%s at %s" % (chNum, cwURL))
         else:
             # Creating a DOM Object for the downloaded document.
@@ -41,14 +41,21 @@ def download_AOT_Manga():
 def getNextURL(DOM, cwURL):
     # 1 - Regex to get info for next Chapter URL in the Current Chapter URL.
     cwURLRegex = re.compile(
-        r"(.*?)(/chapters)(/\d+)(/attack-on-titan-chapter-(\d+))"
+        r"(.*?)(/chapters)(/\d+)(/attack-on-titan-chapter-((\d|\.)+))"
     )
 
     # 2 - Searches the Current-Chapter-URL using Regex and gets the next-Chapter-Name.
     cChpURLSearch = cwURLRegex.search(cwURL)
-    nChpName = (
-        f"attack-on-titan-chapter{str(int(cChpURLSearch.group(5)) + 1)}"
-    )
+    if float(cChpURLSearch.group(5)) == 9 or float(cChpURLSearch.group(5)) == 18:
+        nChpName = f"attack-on-titan-chapter-{str(int(cChpURLSearch.group(5)) + 0.5)}"
+
+    elif float(cChpURLSearch.group(5)) == 9.5 or float(cChpURLSearch.group(5)) == 18.5:
+        nChpName = (
+            f"attack-on-titan-chapter-{str(int(float(cChpURLSearch.group(5)) + 0.5))}"
+        )
+
+    else:
+        nChpName = f"attack-on-titan-chapter-{str(int(cChpURLSearch.group(5)) + 1)}"
 
     # 3 - Selects the next chapter <a> tag using the Next Chapter Name.
     # If none exists then returns None.
@@ -108,13 +115,14 @@ def downloadPage(chNum, pages, sIndex, eIndex):
             img = requests.get(imgURL)
             img.raise_for_status()
         except ConnectionError or HTTPError as err:
-            print(f"Was not able to download Page_{imgURL}")
+            print(f"Was not able to download Page_{os.path.basename(imgURL)[-6:]}")
 
             # Creates a new txt file for the error that occured when downloading the
             # current page. And Opens it.
             file = open(
-                Path.cwd() / f"Chapter_{chNum}" / os.path.basename(imgURL)[-6:]
-                + ".txt",
+                Path.cwd()
+                / f"Chapter_{chNum}"
+                / f"{os.path.basename(imgURL)[-6:]}.txt",
                 "w",
             )
             # Writes the newly created file.

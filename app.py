@@ -3,7 +3,6 @@
 # and downloading the approprient manga.
 
 import os, sys
-from pathlib import Path
 from time import time
 from Scrapers.OnePiece import download_OnePiece_Manga
 from Scrapers.AceNovel import download_AceNovel_Manga
@@ -12,8 +11,7 @@ from Scrapers.AOT import download_AOT_Manga
 
 # This is the main function of the program that manages all that is going in the program.
 def main():
-    # Getting the root working directory of the program and the command-line-argument.
-    rootDir = Path.cwd()
+    # Getting the command-line-argument.
     mangaName = sys.argv[1]
 
     # Setting up the downloaders that are available.
@@ -27,19 +25,19 @@ def main():
     # Changing the Current-Working-Directory to the Newly-Created /
     # An-Existing downloads directory.
     os.makedirs(f"{mangaName}-Manga", exist_ok=True)
-    os.chdir(rootDir / f"{mangaName}-Manga")
+    os.chdir(f"{mangaName}-Manga")
 
     # Checks the manga name once again and determinds which module to call.
     if mangaName == "OnePiece":
         # Call to download_OnePiece_Manga funtion inside Scrapers.OnePiece module.
         # Which downloads the appropriate manga.
         download_OnePiece_Manga()
-    
+
     elif mangaName == "AceNovel":
         # Call to download_AceNovel_Manga funtion inside Scrapers.AceNovel module.
         # Which downloads the appropriate manga.
         download_AceNovel_Manga()
-    
+
     elif mangaName == "AOT":
         # Call to download_AOT_Manga funtion inside Scrapers.AOT module.
         # Which downloads the appropriate manga.
