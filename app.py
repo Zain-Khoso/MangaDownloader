@@ -1,59 +1,73 @@
-#! python3.11.1
-# app.py - Kickstarts the program by getting the manga name in the commandline-arguments
-# and downloading the approprient manga.
+#! python3
+# app.py - Starts the Scraper for the manga provided in the command-line-argument.
 
-import os, sys
+import os, sys, shelve
 from time import time
-from Scrapers.OnePiece import download_OnePiece_Manga
-from Scrapers.AceNovel import download_AceNovel_Manga
-from Scrapers.AOT import download_AOT_Manga
+from Scrapers.TCB_Scans import Scraper
 
 
 # This is the main function of the program that manages all that is going in the program.
 def main():
+    # Making a Storage Dir
+    os.makedirs("Downloaders", exist_ok=True)
+    os.chdir("Downloaders")
+
+    # Avaiable downloaders.
+    downloaders = shelve.open("shelf")
+
+    # Checking if the user wants to download a manga or wants to add downloader for another manga
+    if sys.argv[1] == "save":
+        downloaders[sys.argv[2]] = sys.argv[3]
+        return
+
     # Getting the command-line-argument.
     mangaName = sys.argv[1]
 
-    # Setting up the downloaders that are available.
-    downloaders = ["OnePiece", "AceNovel", "AOT"]
-
     # Checking if the program can or connot download the specified manga.
-    if mangaName not in downloaders:
+    if mangaName not in downloaders.keys():
         print(f"Sorry, We don't currently have a downloader for {mangaName}.")
         return
 
-    # Changing the Current-Working-Directory to the Newly-Created /
-    # An-Existing downloads directory.
-    os.makedirs(f"{mangaName}-Manga", exist_ok=True)
-    os.chdir(f"{mangaName}-Manga")
+    # Downloads the appropriate Manga.
+    for name, url in downloaders.items():
+        if mangaName != name:
+            continue
 
-    # Checks the manga name once again and determinds which module to call.
-    if mangaName == "OnePiece":
-        # Call to download_OnePiece_Manga funtion inside Scrapers.OnePiece module.
-        # Which downloads the appropriate manga.
-        download_OnePiece_Manga()
+        # Changing Directory to the downloads directory.
+        os.chdir("../")
+        os.makedirs("Downloads", exist_ok=True)
+        os.chdir("Downloads")
 
-    elif mangaName == "AceNovel":
-        # Call to download_AceNovel_Manga funtion inside Scrapers.AceNovel module.
-        # Which downloads the appropriate manga.
-        download_AceNovel_Manga()
+        # Downloading
+        manga = Scraper(url)
+        manga.download()
 
-    elif mangaName == "AOT":
-        # Call to download_AOT_Manga funtion inside Scrapers.AOT module.
-        # Which downloads the appropriate manga.
-        download_AOT_Manga()
+        # Changing Directory to the downloaders directory.
+        os.chdir("../Downloaders")
+
+        break
+
+    # Closing the downloaders Shelf.
+    downloaders.close()
 
 
 if __name__ == "__main__":
+    # Start the timer and Calls main function.
     try:
         startTime = time()
         main()
+
+    # Stops the timer and Handels the KeyboardInterupt Exception.
     except KeyboardInterrupt:
         endTime = time()
         print("Stopped.")
+
+    # Stops the timer and prints Done.
     else:
         endTime = time()
         print("Done.")
+
+    # prints the total time the scraper ran.
     finally:
         timeTaken = endTime - startTime
         print(f"Took {round(timeTaken, 2)}s")
