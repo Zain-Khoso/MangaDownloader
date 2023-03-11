@@ -48,12 +48,12 @@ def getNextURL(DOM, cwURL):
     cChpURLSearch = cwURLRegex.search(cwURL)
     if float(cChpURLSearch.group(5)) == 9 or float(cChpURLSearch.group(5)) == 18:
         nChpName = f"attack-on-titan-chapter-{str(int(cChpURLSearch.group(5)) + 0.5)}"
-
+    elif float(cChpURLSearch.group(5)) == 12:
+        nChpName = f"attack-on-titan-chapter-{str(int(cChpURLSearch.group(5)) + 3)}"
     elif float(cChpURLSearch.group(5)) == 9.5 or float(cChpURLSearch.group(5)) == 18.5:
         nChpName = (
             f"attack-on-titan-chapter-{str(int(float(cChpURLSearch.group(5)) + 0.5))}"
         )
-
     else:
         nChpName = f"attack-on-titan-chapter-{str(int(cChpURLSearch.group(5)) + 1)}"
 
