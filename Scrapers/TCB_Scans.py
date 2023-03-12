@@ -49,6 +49,23 @@ class Scraper:
 
         return mangaName.strip()
 
+    def total_size(self):
+        # Size in bytes.
+        total_size = 0
+
+        # Walking the directory to get total_size.
+        for dirpath, dirnames, filenames in os.walk(Path.cwd()):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                total_size += os.path.getsize(fp)
+
+        # Size in GBs
+        gbs, reminder = divmod(total_size, 1000000000)
+        # Size in MBs
+        mbs, bytes = divmod(reminder, 1000000)
+
+        print(f"\nSize:\t{round(gbs):02}GBs , {round(mbs):02}MBs")
+
     def getNextURL(self):
         # Selecting the next btn
         nextBtn = self.DOM.select_one("a.next_page")
