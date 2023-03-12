@@ -32,7 +32,10 @@ class Scraper:
             (.*?/)              # Group1 - Root URL of the site.
             (manga/)            # Group2 - "manga"
             (.*?/)              # Group3 - Manga name.
-            (.*?-((\d|\.)+))    # Group5 - Chapter Number
+            (
+                (.*?-)          # Group5 - "chapter-"
+                ((\d|\.)+)      # Group6 - Chapter Number
+            )    
             """,
             re.VERBOSE,
         )
@@ -66,6 +69,31 @@ class Scraper:
 
         print(f"\nSize:\t{round(gbs):02}GBs , {round(mbs):02}MBs")
 
+    def totalRangeSize(self, sChp, eChp):
+        # List of the chapter names which were downloaded.
+        downloadedDirs = []
+
+        # Adding name to downloadedDirs.
+        for num in range(int(sChp), int(eChp) + 1):
+            downloadedDirs.append(f"Chapter_{num}")
+
+        # Size in bytes.
+        total_size = 0
+
+        # Walking the directory to get total_size.
+        for dirpath, dirnames, filenames in os.walk(Path.cwd()):
+            for f in filenames:
+                if os.path.basename(dirpath) in downloadedDirs:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+
+        # Size in GBs
+        gbs, reminder = divmod(total_size, 1000000000)
+        # Size in MBs
+        mbs, bytes = divmod(reminder, 1000000)
+
+        print(f"\nSize:\t{round(gbs):02}GBs , {round(mbs):02}MBs")
+
     def getNextURL(self):
         # Selecting the next btn
         nextBtn = self.DOM.select_one("a.next_page")
@@ -80,7 +108,7 @@ class Scraper:
         # Loops through all the chapters.
         while self.downloading:
             # Getting the Chapter Number.
-            self.chpNum = self.URLRegex.search(self.cURL).group(5)
+            self.chpNum = self.URLRegex.search(self.cURL).group(6)
 
             # Creating a directory for chapter downloads.
             os.makedirs("Chapter_%s" % self.chpNum, exist_ok=True)
@@ -110,6 +138,112 @@ class Scraper:
             # Weither an error occurs or not.
             finally:
                 self.getNextURL()
+
+        # Printing the total size of the download.
+        self.total_size()
+
+    def downloadSingleChapter(self, chpNum):
+        # Getting the Chapter Number.
+        self.chpNum = chpNum
+
+        # Parsing the first chapter URL.
+        search = self.URLRegex.search(self.cURL)
+
+        # Setting-up the chapter URL.
+        self.cURL = (
+            search.group(1)
+            + search.group(2)
+            + search.group(3)
+            + search.group(5)
+            + self.chpNum
+        )
+
+        # Creating a directory for chapter downloads.
+        os.makedirs("Chapter_%s" % self.chpNum, exist_ok=True)
+
+        # Downloading the chapter DOM.
+        try:
+            res = req.get(self.cURL)
+            res.raise_for_status()
+
+        # Handeling Connection or HTTPError.
+        except ConnectionError or HTTPError as err:
+            print(
+                "Was not able to download Chapter_%s\nAt: %s\nBecause of: %s"
+                % (self.chpNum, self.cURL, err)
+            )
+
+        # If there was no Exception.
+        else:
+            print("Chapter_%s " % self.chpNum, end="")
+
+            # Creating DOM.
+            self.DOM = BeautifulSoup(res.text, "lxml")
+
+            # Call to downloadChapter method, which downloads the manga pages using threading
+            self.downloadChapter()
+
+        # Weither an error occurs or not.
+        finally:
+            self.getNextURL()
+
+        # Changing working directory to download chapter directory.
+        os.chdir("Chapter_%s" % self.chpNum)
+
+        # Printing the total size of the download.
+        self.total_size()
+
+        # Changing working directory back to manga directory.
+        os.chdir("../")
+
+    def downloadRange(self, startChp, endChp):
+        for chpNum in range(int(startChp), int(endChp) + 1):
+            # Getting the Chapter Number.
+            self.chpNum = chpNum
+
+            # Parsing the first chapter URL.
+            search = self.URLRegex.search(self.cURL)
+
+            # Setting-up the chapter URL.
+            self.cURL = (
+                search.group(1)
+                + search.group(2)
+                + search.group(3)
+                + search.group(5)
+                + str(self.chpNum)
+            )
+
+            # Creating a directory for chapter downloads.
+            os.makedirs("Chapter_%s" % self.chpNum, exist_ok=True)
+
+            # Downloading the chapter DOM.
+            try:
+                res = req.get(self.cURL)
+                res.raise_for_status()
+
+            # Handeling Connection or HTTPError.
+            except ConnectionError or HTTPError as err:
+                print(
+                    "Was not able to download Chapter_%s\nAt: %s\nBecause of: %s"
+                    % (self.chpNum, self.cURL, err)
+                )
+
+            # If there was no Exception.
+            else:
+                print("Chapter_%s " % self.chpNum, end="")
+
+                # Creating DOM.
+                self.DOM = BeautifulSoup(res.text, "lxml")
+
+                # Call to downloadChapter method, which downloads the manga pages using threading
+                self.downloadChapter()
+
+            # Weither an error occurs or not.
+            finally:
+                self.getNextURL()
+
+        # Printing the total size of the download.
+        self.totalRangeSize(startChp, endChp)
 
     def downloadChapter(self):
         # Selects all the manga-pages.

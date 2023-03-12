@@ -80,12 +80,22 @@ def main():
             os.makedirs(Path(settings["downloadsDir"]), exist_ok=True)
             os.chdir(Path(settings["downloadsDir"]))
 
-            # Creating the Scraper Object abd downloading the manga.
+            # Creating the Scraper Object and downloading the whole manga.
             manga = Scraper(url)
-            manga.download()
 
-            # Printing the total size of the download.
-            manga.total_size()
+            # Checking if the user wants to download whole manga or parts of it.
+            if len(sys.argv) == 2:
+                manga.download()
+
+            elif len(sys.argv) == 3:
+                # Downloads just the specified chapter.
+                manga.downloadSingleChapter(sys.argv[2])
+
+            elif len(sys.argv) == 4:
+                manga.downloadRange(sys.argv[2], sys.argv[3])
+
+            else:
+                print("Insufficiant Arguments.")
 
             # Changing Directory to the downloaders directory.
             os.chdir(rootDir / "Storage")
