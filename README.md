@@ -4,7 +4,8 @@
 
 ### 1. Use git to download all the source code.
 
-### 2. Use the command `python -m pip install -r requirements.txt`, to install all required pakages\modules.
+### 2. Use the command `python -m pip install -r requirements.txt`
+#### Use this command to install all required pakages\modules.
 
 ### 3. Change the `app.py` file's name to `mangaDownloader.py`.
 
