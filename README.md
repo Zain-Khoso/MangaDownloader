@@ -32,3 +32,9 @@
 
 ### 6. `mangaDownloader.py <manga-name>`.
 #### Use this command to download a particular manga. And that manga's downloader should be in the downloaders.
+
+### 7. `mangaDownloader.py <manga-name> <chapter-number>`.
+#### Use this command to download a particular manga's particular chapter. And that manga's downloader should be in the downloaders.
+
+### 8. `mangaDownloader.py <manga-name> <start-chapter-number>  <end-chapter-number>`.
+#### Use this command to download a particular manga's particular range of chapters. And that manga's downloader should be in the downloaders.
